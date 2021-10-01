@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "callbacks": {
+      "redemptions": [
+        {
+          "name": "backgroundchange",
+          "id" : "redemption_id_1",
+          "commands" : [
+            "echo 'background change'",
+            "echo 'background change 2'"
+          ]
+        },
+        {
+          "name": "swapkeys",
+          "id" : "redemption_id_2",
+          "commands" : [
+            "echo 'swap keys'"
+          ]
+        }
+      ]
+  }
+}
