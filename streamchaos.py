@@ -20,6 +20,12 @@ from twitchAPI.oauth import UserAuthenticator
 #    ItsMeToeKnee
 #    darkcreation876
 #    Diegorellana_
+#    PJZ_here
+#    owaisbukhari
+#    reachMGS
+#    RoboDom711
+#    tommaydos
+#    iHel
 #
 # Cheers
 #    xphallicjanitorx
@@ -32,6 +38,9 @@ from twitchAPI.oauth import UserAuthenticator
 # Subs!!!!
 #   AlongWithCris
 #   natnatenatelift151
+#
+# TIER 3 SUBS
+#    TripolarBears
 
 def _read_config(config_filename):
     # TODO Parse/validate the config information
@@ -56,6 +65,26 @@ def _get_redemption_details(name, config):
 
     return None
 
+def callback_points(uuid, data):
+    """
+    Extracted to the channel points
+    Followers:
+        MrsFabrik
+        aquafunkalisticbootywhap
+    """
+    print('got points callback for UUID ' + str(uuid))
+
+    # TODO Make sure this doesn't totally explode
+    redemption_id = data['data']['redemption']['reward']['id']
+
+    print('Redemption id is' + str(redemption_id))
+
+    if redemption_id in redemption_call_backs:
+        redemption_call_backs[redemption_id](data)
+    else:
+        print('Unexpected points redemption!!!!')
+
+redemption_call_backs = {}
 
 def _start_twitch_client():
     load_dotenv()
@@ -82,6 +111,15 @@ def _start_twitch_client():
     pubsub = PubSub(twitch)
     pubsub.start()
 
+    points_redeem_uuid = pubsub.listen_channel_points(user_id, callback_points)
+
+    # Prevents early termination
+    input('press ENTER to close...')
+
+    # you do not need to unlisten to topics before stopping but you can listen and unlisten at any moment you want
+    pubsub.unlisten(points_redeem_uuid)
+    pubsub.stop()
+
 
 @click.group()
 @click.option("--config", default="config.json")
@@ -102,6 +140,8 @@ def cli(ctx, config, log):
 def dryrun(ctx):
     config = ctx.obj["config"]
     click.echo('Running stream chaos')
+
+    _start_twitch_client()
 
     # TODO start the client
 
