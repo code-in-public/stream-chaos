@@ -30,6 +30,6 @@ setup(author='Code-in-public contributors',
       packages=find_packages(),
       entry_points={'console_scripts': ['streamchaos = streamchaos:main']},
       version='0.1.0',
-      install_requires=['click', 'dotenv', 'twitchapi'],
+      install_requires=['click', 'python-dotenv', 'twitchapi', 'wheel'],
       zip_safe=False,
       )
