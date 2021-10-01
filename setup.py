@@ -1,4 +1,3 @@
-# bootstrap if we need to
 try:
     import setuptools  # noqa
 except ImportError:
@@ -7,29 +6,31 @@ except ImportError:
 
 from setuptools import setup, find_packages
 
-classifiers = ['Development Status :: 3 - Alpha',
-               'Environment :: Console',
-               'Intended Audience :: Developers',
-               'Intended Audience :: End Users/Desktop',
-               'Intended Audience :: Other Audience',
-               'Natural Language :: English',
-               'Operating System :: MacOS :: MacOS X',
-               'Operating System :: Microsoft :: Windows',
-               'Operating System :: POSIX',
-               'Programming Language :: Python :: 3.8',
-               'Programming Language :: Python :: Implementation :: CPython',
-               'Topic :: Communications :: Chat',
-               ]
+classifiers = [
+    'Development Status :: 3 - Alpha',
+    'Environment :: Console',
+    'Intended Audience :: Developers',
+    'Intended Audience :: End Users/Desktop',
+    'Intended Audience :: Other Audience',
+    'Natural Language :: English',
+    'Operating System :: MacOS :: MacOS X',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: Implementation :: CPython',
+    'Topic :: Communications :: Chat',
+]
 
-setup(author='Code-in-public contributors',
-      author_email='code-in-public',
-      classifiers=classifiers,
-      description='allow twitch viewers to cause chaos',
-      name='streamchaos',
-      url='http://github.com/code-in-public/streamchaos',
-      packages=find_packages(),
-      entry_points={'console_scripts': ['streamchaos = streamchaos:main']},
-      version='0.1.0',
-      install_requires=['click', 'python-dotenv', 'twitchapi', 'wheel'],
-      zip_safe=False,
-      )
+setup(
+    name='StreamChaos',
+    version='0.1.0',
+    description='Allow twitch viewers to cause chaos',
+    url='http://github.com/code-in-public/streamchaos',
+    author='twitch.tv/codeinpublic Community',
+    author_email='',
+    classifiers=classifiers,
+    entry_points={'console_scripts': ['streamchaos = streamchaos:main']},
+    install_requires=['click', 'python-dotenv', 'twitchapi', 'wheel'],
+    packages=find_packages(),
+    zip_safe=False
+)
