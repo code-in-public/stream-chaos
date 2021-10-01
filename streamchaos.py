@@ -133,8 +133,12 @@ def trigger(ctx, name):
         click.echo(f"Command output : {result.stdout}")
 
 
-if __name__ == '__main__':
+def main():
     cli(obj={})
+
+
+if __name__ == '__main__':
+    main()
 
 # Usecases:
 # Base usecase to run the app
