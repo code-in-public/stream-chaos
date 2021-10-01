@@ -42,6 +42,7 @@ from twitchAPI.oauth import UserAuthenticator
 # TIER 3 SUBS
 #    TripolarBears
 
+
 def _read_config(config_filename):
     # TODO Parse/validate the config information
     with open(config_filename, 'r') as f:
@@ -65,60 +66,74 @@ def _get_redemption_details(name, config):
 
     return None
 
-def callback_points(uuid, data):
-    """
-    Extracted to the channel points
-    Followers:
-        MrsFabrik
-        aquafunkalisticbootywhap
-    """
-    print('got points callback for UUID ' + str(uuid))
 
-    # TODO Make sure this doesn't totally explode
-    redemption_id = data['data']['redemption']['reward']['id']
+class RedemptionPointsClient:
 
-    print('Redemption id is' + str(redemption_id))
+    def __init__(self):
+        self.redemption_call_backs = {}
+        self.pubsub = None
+        self.points_redeem_uuid = None
 
-    if redemption_id in redemption_call_backs:
-        redemption_call_backs[redemption_id](data)
-    else:
-        print('Unexpected points redemption!!!!')
+    def callback_points(self, uuid, data):
+        """
+        Extracted to the channel points
+        Followers:
+            MrsFabrik
+            aquafunkalisticbootywhap
+        """
+        print('got points callback for UUID ' + str(uuid))
 
-redemption_call_backs = {}
+        # TODO Make sure this doesn't totally explode
+        redemption_id = data['data']['redemption']['reward']['id']
 
-def _start_twitch_client():
-    load_dotenv()
+        print('Redemption id is' + str(redemption_id))
 
-    client_id = os.getenv('client_id')
-    client_secret = os.getenv('client_secret')
-    # create instance of twitch API
-    twitch = Twitch(client_id, client_secret)
-    twitch.authenticate_app([])
+        if redemption_id in self.redemption_call_backs:
+            self.redemption_call_backs[redemption_id](data)
+        else:
+            print('Unexpected points redemption!!!!')
 
-    # get ID of user
-    user_info = twitch.get_users(logins=['codeinpublic'])
-    user_id = user_info['data'][0]['id']
+    def start(self):
+        load_dotenv()
 
-    target_scope = [AuthScope.WHISPERS_READ, AuthScope.CHANNEL_READ_REDEMPTIONS]
-    auth = UserAuthenticator(twitch, target_scope, force_verify=False)
+        client_id = os.getenv('client_id')
+        client_secret = os.getenv('client_secret')
+        # create instance of twitch API
+        self.twitch = twitch = Twitch(client_id, client_secret)
+        twitch.authenticate_app([])
 
-    # this will open your default browser and prompt you with the twitch verification website
-    token, refresh_token = auth.authenticate()
+        # get ID of user
+        user_info = twitch.get_users(logins=['codeinpublic'])
+        user_id = user_info['data'][0]['id']
 
-    twitch.set_user_authentication(token, target_scope, refresh_token)
+        target_scope = [AuthScope.WHISPERS_READ, AuthScope.CHANNEL_READ_REDEMPTIONS]
+        auth = UserAuthenticator(twitch, target_scope, force_verify=False)
 
-    # starting up PubSub
-    pubsub = PubSub(twitch)
-    pubsub.start()
+        # this will open your default browser and prompt you with the twitch verification website
+        token, refresh_token = auth.authenticate()
 
-    points_redeem_uuid = pubsub.listen_channel_points(user_id, callback_points)
+        twitch.set_user_authentication(token, target_scope, refresh_token)
 
-    # Prevents early termination
-    input('press ENTER to close...')
+        # starting up PubSub
+        self.pubsub = pubsub = PubSub(twitch)
+        pubsub.start()
 
-    # you do not need to unlisten to topics before stopping but you can listen and unlisten at any moment you want
-    pubsub.unlisten(points_redeem_uuid)
-    pubsub.stop()
+        self.points_redeem_uuid = pubsub.listen_channel_points(user_id, self.callback_points)
+
+    def stop(self):
+        # you do not need to unlisten to topics before stopping but you can listen and unlisten at any moment you want
+        self.pubsub.unlisten(self.points_redeem_uuid)
+        self.pubsub.stop()
+
+    @classmethod
+    def run(cls):
+        client = cls()
+        client.start()
+
+        # Prevents early termination
+        input('press ENTER to close...')
+
+        client.stop()
 
 
 @click.group()
@@ -141,9 +156,7 @@ def dryrun(ctx):
     config = ctx.obj["config"]
     click.echo('Running stream chaos')
 
-    _start_twitch_client()
-
-    # TODO start the client
+    RedemptionPointsClient.run()
 
 
 @cli.command()
