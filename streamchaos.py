@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import subprocess
+from functools import cached_property
 
 from dotenv import load_dotenv
 
@@ -43,10 +44,23 @@ from twitchAPI.oauth import UserAuthenticator
 #    TripolarBears
 
 
-def _read_config(config_filename):
-    # TODO Parse/validate the config information
-    with open(config_filename, 'r') as f:
-        return json.load(f)
+class Config:
+
+    def __init__(self, filename):
+        self.filename = filename
+        logging.info("Using config file %s", filename)
+
+    @cached_property
+    def raw(self):
+        # TODO Parse/validate the config information
+        with open(self.filename, 'r') as f:
+            return json.load(f)
+
+    def redemption_details(self, name):
+        for redemption_details in self.raw["callbacks"]["redemptions"]:
+            if redemption_details["name"] == name:
+                return redemption_details
+        return None
 
 
 def _get_twitch_secrets():
@@ -56,15 +70,6 @@ def _get_twitch_secrets():
     client_secret = os.getenv('client_secret')
 
     return client_id, client_secret
-
-
-def _get_redemption_details(name, config):
-    # Get the command for the trigger name
-    for redemption_details in config["callbacks"]["redemptions"]:
-        if redemption_details["name"] == name:
-            return redemption_details
-
-    return None
 
 
 class RedemptionPointsClient:
@@ -141,13 +146,12 @@ class RedemptionPointsClient:
 @click.option("--log", default="jsonTest.log")
 @click.pass_context
 def cli(ctx, config, log):
-    ctx.obj["config"] = _read_config(config)
+    ctx.obj["config"] = Config(config)
     ctx.obj["log"] = log
 
     logging.basicConfig(filename=log, level=logging.DEBUG)
     logging.info("Started twitchAPIBot")
 
-    logging.info("Using config file " + config)
 
 
 @cli.command()
@@ -177,7 +181,7 @@ def trigger(ctx, name):
     config = ctx.obj["config"]
     click.echo(f"Triggering command {name}")
 
-    redemption_details = _get_redemption_details(name, config)
+    redemption_details = config.redemption_details(name)
     command_list = redemption_details["commands"]
 
     for command in command_list:
