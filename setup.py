@@ -29,7 +29,7 @@ setup(
     author='twitch.tv/codeinpublic Community',
     author_email='',
     classifiers=classifiers,
-    entry_points={'console_scripts': ['streamchaos = streamchaos:main']},
+    entry_points={'console_scripts': ['streamchaos = streamchaos.cli:main']},
     install_requires=['click', 'python-dotenv', 'twitchapi', 'wheel'],
     packages=find_packages(),
     zip_safe=False
